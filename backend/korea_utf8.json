@@ -1,0 +1,68 @@
+﻿Γùç injected env (6) from .env // tip: Γîÿ enable debugging { debug: true }
+{
+  "area": {
+    "id": 2267,
+    "name": "World",
+    "code": "INT",
+    "flag": null
+  },
+  "competition": {
+    "id": 2000,
+    "name": "FIFA World Cup",
+    "code": "WC",
+    "type": "CUP",
+    "emblem": "https://crests.football-data.org/wm26.png"
+  },
+  "season": {
+    "id": 2398,
+    "startDate": "2026-06-11",
+    "endDate": "2026-07-19",
+    "currentMatchday": 1,
+    "winner": null
+  },
+  "id": 537328,
+  "utcDate": "2026-06-12T02:00:00Z",
+  "status": "FINISHED",
+  "matchday": 1,
+  "stage": "GROUP_STAGE",
+  "group": "GROUP_A",
+  "lastUpdated": "2026-06-12T04:01:39Z",
+  "homeTeam": {
+    "id": 772,
+    "name": "South Korea",
+    "shortName": "Korea Republic",
+    "tla": "KOR",
+    "crest": "https://crests.football-data.org/772.png"
+  },
+  "awayTeam": {
+    "id": 798,
+    "name": "Czechia",
+    "shortName": "Czechia",
+    "tla": "CZE",
+    "crest": "https://crests.football-data.org/798.svg"
+  },
+  "score": {
+    "winner": "HOME_TEAM",
+    "duration": "REGULAR",
+    "fullTime": {
+      "home": 2,
+      "away": 1
+    },
+    "halfTime": {
+      "home": 0,
+      "away": 0
+    }
+  },
+  "odds": {
+    "msg": "Activate Odds-Package in User-Panel to retrieve odds."
+  },
+  "referees": [
+    {
+      "id": 276653,
+      "name": "Amin Omar",
+      "type": "REFEREE",
+      "nationality": "Egypt"
+    }
+  ]
+}
+

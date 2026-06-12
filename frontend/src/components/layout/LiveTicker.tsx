@@ -28,9 +28,13 @@ export default function LiveTicker() {
 
               const startTime = new Date(m.kickoffTime);
               const isToday = startTime.toDateString() === now.toDateString();
+              const isRecent = now.getTime() - startTime.getTime() < 24 * 60 * 60 * 1000;
 
-              // A match is live if it has an ongoing score and isn't locked, or kicks off today
-              return (m.team1Score !== null && !m.isLocked) || (isToday && !m.isLocked);
+              // A match is shown if:
+              // 1. It's live (has score and not locked)
+              // 2. It kicks off today (and not locked)
+              // 3. It finished recently (in the last 24 hours)
+              return (m.team1Score !== null && !m.isLocked) || (isToday && !m.isLocked) || (m.isLocked && isRecent);
             });
 
             setLiveMatches(filtered.slice(0, 5));
@@ -91,7 +95,9 @@ export default function LiveTicker() {
                     )}
                   </div>
 
-                  {match.team1Score !== null && !match.isLocked ? (
+                  {match.isLocked ? (
+                    <span className="text-[8px] font-black bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-white/5 uppercase">Final</span>
+                  ) : match.team1Score !== null ? (
                     <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded animate-pulse uppercase">Live</span>
                   ) : (
                     <span className="text-[8px] font-black text-slate-500 uppercase">
