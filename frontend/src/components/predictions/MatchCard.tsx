@@ -242,7 +242,7 @@ export default function MatchCard({ match, prediction, onPick, slotTeams, picks 
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity">
+      <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-center lg:opacity-0 group-hover/card:opacity-100 transition-opacity">
          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-green-500 flex items-center">
             View Analysis & Discussion
             <ChevronRight className="h-3 w-3 ml-1" />

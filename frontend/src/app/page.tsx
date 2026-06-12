@@ -31,7 +31,7 @@ export default function Home() {
                         <span>The Future of Football</span>
                      </div>
 
-                     <h1 className="nike-title text-5xl md:text-8xl lg:text-[9rem] mb-6 glow-text tracking-tighter">
+                     <h1 className="nike-title text-4xl md:text-7xl lg:text-[7rem] mb-6 glow-text tracking-tighter">
                         WHO WILL<br />
                         <span className="text-green-500">BE 2026?</span>
                      </h1>

@@ -139,7 +139,7 @@ export default function CommentThread({ matchId }: CommentThreadProps) {
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all">
+          <div className="flex items-center space-x-1 lg:opacity-0 group-hover:opacity-100 transition-all">
             {user && !isReply && (
               <button
                 onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyText(''); }}

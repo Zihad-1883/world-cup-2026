@@ -20,8 +20,8 @@ export async function getPredictionStats(): Promise<PredictionStats> {
   );
   const totalPredictors = parseInt(totalRow[0]?.count ?? '0', 10);
 
-  // Final round picks as "predicted winner"
-  const rows = await query<Record<string, unknown>>(
+  // 1. Try to get Final round picks (Predicted Winner)
+  let rows = await query<Record<string, unknown>>(
     `SELECT
        t.id, t.name, t.code, t.group_name, t.group_position, t.flag_url, t.confederation,
        COUNT(p.id)::int AS pick_count
@@ -32,6 +32,20 @@ export async function getPredictionStats(): Promise<PredictionStats> {
      GROUP BY t.id, t.name, t.code, t.group_name, t.group_position, t.flag_url, t.confederation
      ORDER BY pick_count DESC`
   );
+
+  // 2. Fallback: Most picked teams across ALL matches
+  if (!rows.length) {
+    rows = await query<Record<string, unknown>>(
+      `SELECT
+         t.id, t.name, t.code, t.group_name, t.group_position, t.flag_url, t.confederation,
+         COUNT(p.id)::int AS pick_count
+       FROM predictions p
+       JOIN teams t ON p.predicted_winner_id = t.id
+       GROUP BY t.id, t.name, t.code, t.group_name, t.group_position, t.flag_url, t.confederation
+       ORDER BY pick_count DESC
+       LIMIT 10`
+    );
+  }
 
   if (!rows.length) {
     return { topPickedWinner: null, popularPicks: [], totalPredictors };

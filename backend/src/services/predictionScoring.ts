@@ -95,11 +95,11 @@ export async function scoreGroupQualifiers(
     );
 
     for (const pred of predictions) {
-      // Score Lite Predictions (0.5 pts per correct qualifier)
+      // Score Lite Predictions (2 pts per correct qualifier)
       let points = 0;
       // Check if user's pick 1 or 2 is in the actual qualifiers
-      if (pred.team1_id === team1Id || pred.team1_id === team2Id) points += 0.5;
-      if (pred.team2_id === team1Id || pred.team2_id === team2Id) points += 0.5;
+      if (pred.team1_id === team1Id || pred.team1_id === team2Id) points += 2;
+      if (pred.team2_id === team1Id || pred.team2_id === team2Id) points += 2;
 
       await client.query(
         'UPDATE group_predictions_lite SET points_earned = $1, updated_at = NOW() WHERE id = $2',
