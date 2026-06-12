@@ -6,6 +6,8 @@ import { usePredictionMode } from '@/context/PredictionModeContext';
 import { usePredictionState } from '@/context/PredictionStateContext';
 import { submitLitePredictions } from '@/lib/api';
 import { Trophy, CheckCircle2, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 interface LiteGroupPredictionsProps {
   onSaveSuccess?: () => void;
@@ -48,7 +50,9 @@ export default function LiteGroupPredictions({ onSaveSuccess }: LiteGroupPredict
 
   const handleSave = async () => {
     if (!token) {
-      setMessage({ text: 'Picks saved locally as a guest!', type: 'success' });
+      toast.success('Picks saved locally as a guest!', {
+        icon: <span>💾</span>
+      });
       if (onSaveSuccess) {
         setTimeout(onSaveSuccess, 1000);
       }
@@ -56,16 +60,15 @@ export default function LiteGroupPredictions({ onSaveSuccess }: LiteGroupPredict
     }
 
     setSaving(true);
-    setMessage(null);
     const res = await submitLitePredictions(token, litePicks);
     if (res.success) {
-      setMessage({ text: 'Lite mode predictions saved successfully!', type: 'success' });
+      toast.success('Lite mode predictions saved successfully!');
       await refreshData();
       if (onSaveSuccess) {
         setTimeout(onSaveSuccess, 1500);
       }
     } else {
-      setMessage({ text: res.error, type: 'error' });
+      toast.error(res.error || 'Failed to save lite picks');
     }
     setSaving(false);
   };
@@ -99,8 +102,14 @@ export default function LiteGroupPredictions({ onSaveSuccess }: LiteGroupPredict
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {groupsArr.map(groupName => (
-          <div key={groupName} className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl transition-all hover:border-slate-600 group">
+        {groupsArr.map((groupName, idx) => (
+          <motion.div 
+            key={groupName}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="bg-slate-800 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl transition-all hover:border-slate-600 group"
+          >
             <div className="bg-slate-900/50 px-5 py-3 border-b border-slate-700/50 flex justify-between items-center text-xs font-black uppercase tracking-widest text-slate-500">
               <span>Group {groupName}</span>
               <span className={litePicks[groupName]?.length === 3 ? 'text-green-500' : 'text-amber-500'}>
@@ -150,21 +159,12 @@ export default function LiteGroupPredictions({ onSaveSuccess }: LiteGroupPredict
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Save Button & Feedback */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-50">
         <div className="bg-slate-800/90 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-2xl ring-1 ring-black/20">
-          {message && (
-            <div className={`mb-4 p-3 rounded-xl text-center text-sm font-bold flex items-center justify-center space-x-2 ${
-              message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-            }`}>
-              {message.type === 'success' ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-              <span>{message.text}</span>
-            </div>
-          )}
           
           <button
             onClick={handleSave}

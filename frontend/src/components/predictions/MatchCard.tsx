@@ -22,6 +22,8 @@ const POINTS_MAP: Record<string, number> = {
   'FINAL': 10
 };
 
+import { motion } from 'framer-motion';
+
 export default function MatchCard({ match, prediction, onPick, slotTeams, picks }: MatchCardProps) {
   const resolveSlotTeam = (source: any): { label: string; team: TeamBasic | null } => {
     if (source.type === 'group_winner' || source.type === 'group_runner_up') {
@@ -135,10 +137,17 @@ export default function MatchCard({ match, prediction, onPick, slotTeams, picks 
   };
 
   return (
-    <Link 
-      href={`/matches/${match.id}`}
-      className={`block rounded-[32px] border transition-all duration-300 ${getBorderClass()} glass-panel p-6 hover:bg-white/[0.05] group/card cursor-pointer relative overflow-hidden`}
+    <motion.div
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="h-full"
     >
+      <Link 
+        href={`/matches/${match.id}`}
+        className={`block h-full rounded-[32px] border transition-all duration-300 ${getBorderClass()} glass-panel p-6 hover:bg-white/[0.05] group/card cursor-pointer relative overflow-hidden`}
+      >
       <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full -translate-y-16 translate-x-16 group-hover/card:bg-green-500/10 transition-colors" />
 
       <div className="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-[0.2em]">
@@ -248,6 +257,7 @@ export default function MatchCard({ match, prediction, onPick, slotTeams, picks 
             <ChevronRight className="h-3 w-3 ml-1" />
          </span>
       </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }

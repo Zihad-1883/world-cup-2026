@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import { Trophy, Users, TrendingUp, ChevronRight, Play, Star, Calendar } from 'lucide-react';
-import CommentThread from '@/components/comments/CommentThread';
+import { Trophy, Users, TrendingUp, ChevronRight, Play, Star, Calendar, ExternalLink, Link2 } from 'lucide-react';
+
+const LinkedInIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+);
+
+const GithubIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.28 1.15-.28 2.35 0 3.5-.73 1.02-1.08 2.25-1 3.5 0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-3-7-3"/></svg>
+);
 
 export default function Home() {
    return (
@@ -51,9 +58,9 @@ export default function Home() {
                            <span>Predict Now</span>
                            <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                         </Link>
-                        <Link href="/bracket" className="flex items-center space-x-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-8 py-5 rounded-2xl font-black uppercase tracking-widest text-sm backdrop-blur-xl transition-all active:scale-95">
+                        <Link href="/explore" className="flex items-center space-x-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-8 py-5 rounded-2xl font-black uppercase tracking-widest text-sm backdrop-blur-xl transition-all active:scale-95">
                            <Play className="h-5 w-5 text-green-500" />
-                           <span>Tournament Flow</span>
+                           <span>Explore Tournament</span>
                         </Link>
                      </div>
                   </div>
@@ -170,29 +177,70 @@ export default function Home() {
                </div>
             </section>
 
-            {/* Global Fan Chat Section */}
-            <section className="bg-slate-900/40 border-t border-white/5 pt-32 pb-48">
-               <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="text-center mb-16">
-                     <h2 className="nike-title text-6xl mb-4 italic">Global Fan Chat</h2>
-                     <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Join the conversation with millions of fans worldwide</p>
+            {/* HOW TO USE SECTION */}
+            <section className="py-32 bg-slate-950/50 border-t border-white/5 relative overflow-hidden">
+               <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
+               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                  <div className="text-center mb-20">
+                     <h2 className="nike-title text-6xl mb-4 italic">How it <span className="text-green-500">Works</span></h2>
+                     <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Master the game in 4 simple steps</p>
                   </div>
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-[40px] p-8 shadow-2xl overflow-hidden relative">
-                     <div className="absolute top-0 right-0 bg-green-500/10 w-64 h-64 blur-3xl rounded-full" />
-                     <CommentThread />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                     {[
+                        { step: "01", title: "Join the Elite", desc: "Create your account to sync predictions across devices and join the global leaderboard." },
+                        { step: "02", title: "Choose Your Mode", desc: "Pick 'Lite' for quick group qualifiers or 'Pro' for deep match-by-match score predictions." },
+                        { step: "03", title: "Build Your Bracket", desc: "Navigate through knockout rounds and crown your 2026 World Champion." },
+                        { step: "04", title: "Track & Dominate", desc: "Earn points for accuracy, climb the ranks, and share your wisdom in the fan chat." }
+                     ].map((item, idx) => (
+                        <div key={idx} className="relative group p-8 rounded-[32px] hover:bg-white/5 transition-all duration-500 border border-transparent hover:border-white/10">
+                           <div className="text-8xl font-black text-white/5 absolute -top-12 -left-4 group-hover:text-green-500/10 transition-colors pointer-events-none">{item.step}</div>
+                           <div className="relative">
+                              <h3 className="nike-title text-2xl mb-4 italic group-hover:text-green-500 transition-colors uppercase tracking-tight">{item.title}</h3>
+                              <div className="h-1 w-12 bg-green-500/30 mb-6 group-hover:w-full group-hover:bg-green-500 transition-all duration-700" />
+                              <p className="text-slate-400 text-sm font-medium leading-relaxed group-hover:text-slate-300 transition-colors">{item.desc}</p>
+                           </div>
+                        </div>
+                     ))}
                   </div>
                </div>
             </section>
          </main>
 
          {/* Footer */}
-         <footer className="bg-black py-16 border-t border-white/5">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-               <div className="flex items-center justify-center space-x-3 mb-8">
-                  <Trophy className="h-8 w-8 text-green-500" />
-                  <span className="nike-title text-3xl">WC 2026 Predictions</span>
+         <footer className="bg-black py-20 border-t border-white/5 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+                  <div className="text-center md:text-left">
+                     <div className="flex items-center justify-center md:justify-start space-x-3 mb-6">
+                        <Trophy className="h-8 w-8 text-green-500" />
+                        <span className="nike-title text-3xl italic">WC 2026 Predictions</span>
+                     </div>
+                     <p className="text-slate-500 text-xs font-black uppercase tracking-[0.3em] mb-2">Designed & Developed by</p>
+                     <p className="nike-title text-4xl text-white italic tracking-tighter">ZIHAD <span className="text-green-500">RAHMAN</span></p>
+                  </div>
+
+                  <div className="flex flex-col items-center md:items-end space-y-6">
+                     <div className="flex space-x-6">
+                        <a href="https://www.linkedin.com/in/mizbaur-rahman-zihad/" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl hover:bg-green-500 hover:text-black transition-all group scale-110">
+                           <LinkedInIcon className="h-6 w-6" />
+                        </a>
+                        <a href="https://github.com/Zihad-1883" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl hover:bg-green-500 hover:text-black transition-all group scale-110">
+                           <GithubIcon className="h-6 w-6" />
+                        </a>
+                        <a href="https://portfolio-one-eta-y6gdjq846m.vercel.app/" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl hover:bg-green-500 hover:text-black transition-all group scale-110">
+                           <ExternalLink className="h-6 w-6" />
+                        </a>
+                     </div>
+                     <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest text-center md:text-right max-w-xs">
+                        Pushing the boundaries of football prediction and design. &copy; 2026 World Cup Fans.
+                     </p>
+                  </div>
                </div>
-               <p className="text-slate-500 text-xs font-black uppercase tracking-[0.3em]">&copy; 2026 World Cup Fans. Not affiliated with FIFA.</p>
+               
+               <div className="pt-8 border-t border-white/5 text-center">
+                  <p className="text-slate-800 text-[9px] font-black uppercase tracking-[0.5em] italic">Not affiliated with FIFA or any national federation</p>
+               </div>
             </div>
          </footer>
       </div>

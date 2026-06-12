@@ -19,6 +19,7 @@ export default function Navbar() {
     { href: '/predict', label: 'Predict' },
     { href: '/bracket', label: 'Bracket' },
     { href: '/stats', label: 'Stats' },
+    { href: '/community', label: 'Community' },
   ];
 
   const isActive = (path: string) => pathname === path;

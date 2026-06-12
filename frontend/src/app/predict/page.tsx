@@ -9,6 +9,8 @@ import MatchCard from '@/components/predictions/MatchCard';
 import Navbar from '@/components/layout/Navbar';
 import Link from 'next/link';
 import { Save, AlertCircle, CheckCircle2, ChevronRight, Info, Lock as LockIcon, TriangleAlert, Sparkles, RotateCcw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 import { usePredictionMode } from '@/context/PredictionModeContext';
 import { usePredictionState } from '@/context/PredictionStateContext';
@@ -38,18 +40,21 @@ export default function PredictPage() {
 
   // Derived logic...
   const handleRandomize = () => {
-    if (confirm('This will fill all matches with random winners based on your current mode. Continue?')) {
+    // We could use a custom Modal here, but let's use a quick styled confirm for now
+    if (window.confirm('This will fill all matches with random winners based on your current mode. Continue?')) {
       randomizeAll();
-      setSaveStatus({ type: 'success', message: 'Generated random picks!' });
-      setTimeout(() => setSaveStatus(null), 3000);
+      toast.success('🪄 Sorcery! Generated random picks for you.', {
+        icon: <span>✨</span>
+      });
     }
   };
 
   const handleReset = () => {
-    if (confirm('Are you sure you want to clear ALL your predictions? This cannot be undone.')) {
+    if (window.confirm('Are you sure you want to clear ALL your predictions? This cannot be undone.')) {
       resetAll();
-      setSaveStatus({ type: 'success', message: 'All predictions cleared.' });
-      setTimeout(() => setSaveStatus(null), 3000);
+      toast.info('Predictions cleared. Start fresh!', {
+        icon: <RotateCcw className="h-4 w-4" />
+      });
     }
   };
 
@@ -83,20 +88,29 @@ export default function PredictPage() {
 
       const res = await submitPredictions(token!, predArray);
       if (res.success) {
-        setSaveStatus({ type: 'success', message: `Successfully saved ${res.data.saved} predictions!` });
+        toast.success(`Locked in ${res.data.saved} predictions!`, {
+          icon: <CheckCircle2 className="h-5 w-5 text-green-500" />
+        });
+
         await refreshData();
-        if (activeRound === 'GROUP') {
+        
+        // AUTO ADVANCE
+        const currentIdx = ROUNDS.indexOf(activeRound);
+        if (currentIdx < ROUNDS.length - 1) {
            setTimeout(() => {
-             setActiveRound('R32');
+             setActiveRound(ROUNDS[currentIdx + 1]);
              window.scrollTo({ top: 0, behavior: 'smooth' });
-           }, 1500);
+             toast.info(`Next up: ${ROUND_LABELS[ROUNDS[currentIdx + 1]]}`, {
+               position: "top-center",
+               autoClose: 2000
+             });
+           }, 1000);
         }
-        setTimeout(() => setSaveStatus(null), 5000);
       } else {
-        setSaveStatus({ type: 'error', message: res.error });
+        toast.error(res.error || 'Failed to save predictions');
       }
     } catch (err) {
-      setSaveStatus({ type: 'error', message: 'Failed to connect to server' });
+      toast.error('Failed to connect to server');
     } finally {
       setSaveLoading(false);
     }
@@ -216,6 +230,14 @@ export default function PredictPage() {
                 <span>Reset All</span>
               </button>
 
+              <Link 
+                href="/bracket"
+                className="flex items-center space-x-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white px-6 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95"
+              >
+                <Trophy className="h-4 w-4 text-green-500" />
+                <span>View Bracket</span>
+              </Link>
+
               <div className="h-10 w-px bg-white/5 mx-2 hidden sm:block"></div>
 
               {user ? (
@@ -268,17 +290,29 @@ export default function PredictPage() {
           </div>
         </div>
 
-        {/* Save Status Overlay */}
-        {saveStatus && (
-           <div className={`mb-8 p-4 rounded-2xl text-center text-sm font-black uppercase tracking-widest flex items-center justify-center space-x-3 animate-in fade-in slide-in-from-top-4 ${
-             saveStatus.type === 'success' ? 'bg-green-500/10 text-green-500 ring-1 ring-green-500/20' : 'bg-red-500/10 text-red-500 ring-1 ring-red-500/20'
-           }`}>
-             {saveStatus.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
-             <span>{saveStatus.message}</span>
-           </div>
-        )}
+        {/* Save Status Overlay (Legacy, keeping for small errors if any) */}
+        <AnimatePresence>
+          {saveStatus && (
+             <motion.div 
+               initial={{ opacity: 0, y: -20 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: -20 }}
+               className={`mb-8 p-4 rounded-2xl text-center text-sm font-black uppercase tracking-widest flex items-center justify-center space-x-3 border ${
+               saveStatus.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+             }`}>
+               {saveStatus.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+               <span>{saveStatus.message}</span>
+             </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="animate-in fade-in duration-700">
+        <motion.div 
+          key={activeRound + mode}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="animate-in fade-in duration-700"
+        >
           {activeRound === 'GROUP' ? (
              mode === 'LITE' ? (
                 <LiteGroupPredictions onSaveSuccess={() => setActiveRound('R32')} />
@@ -369,7 +403,7 @@ export default function PredictPage() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </main>
     </div>
   );
