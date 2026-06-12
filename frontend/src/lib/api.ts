@@ -88,7 +88,7 @@ async function apiFetch<T>(
 export const login = (data: any) => apiFetch<{ user: any, token: string }>('/auth/login', { method: 'POST', body: JSON.stringify(data) });
 export const register = (data: any) => apiFetch<{ user: any, token: string }>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
 export const logout = () => apiFetch<{ success: true }>('/auth/logout', { method: 'POST' });
-export const refresh = () => apiFetch<{ token: string }>('/auth/refresh', { method: 'POST' });
+export const refresh = () => apiFetch<{ user: UserPublic; token: string }>('/auth/refresh', { method: 'POST' });
 
 // Teams
 export const getTeams = () => apiFetch<{ teams: TeamBasic[] }>('/teams');

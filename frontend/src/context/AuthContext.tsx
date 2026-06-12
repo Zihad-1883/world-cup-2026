@@ -41,14 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const response = await apiRefresh();
-      if (response.success && response.data.token) {
+
+      // If the backend returns both user and token data structures
+      if (response && response.success && response.data?.token) {
         setToken(response.data.token);
-        // After getting token, we need to get the user info
-        // We can either include it in refresh response or fetch /me
-        const { getMe } = await import('@/lib/api');
-        const meRes = await getMe(response.data.token);
-        if (meRes.success) {
-          setUser(meRes.data.user);
+
+        if (response.data.user) {
+          setUser(response.data.user); // Instantly populated, zero network lag!
         }
       }
     } catch (error) {
@@ -63,12 +62,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshAccessToken]);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      isLoading, 
-      login, 
-      logout, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isLoading,
+      login,
+      logout,
       setToken,
       setUser
     }}>

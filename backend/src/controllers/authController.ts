@@ -28,8 +28,8 @@ function toUserPublic(row: Record<string, unknown>): UserPublic {
 function setRefreshCookie(res: Response, token: string): void {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
   });
 }
@@ -162,8 +162,14 @@ export async function refresh(req: Request, res: Response): Promise<void> {
     return;
   }
 
+  // ─── OPTIMIZED QUERY ───────────────────────────────────────────────────────
+  // Fetch the token details alongside ALL user info fields needed for toUserPublic
   const rtRow = await queryOne<Record<string, unknown>>(
-    'SELECT rt.user_id, rt.expires_at, u.email, u.username, u.role FROM refresh_tokens rt JOIN users u ON u.id = rt.user_id WHERE rt.token = $1',
+    `SELECT rt.user_id, rt.expires_at, 
+            u.id, u.email, u.username, u.avatar_url, u.role, u.prediction_mode, u.created_at
+     FROM refresh_tokens rt 
+     JOIN users u ON u.id = rt.user_id 
+     WHERE rt.token = $1`,
     [token]
   );
 
@@ -181,13 +187,17 @@ export async function refresh(req: Request, res: Response): Promise<void> {
   }
 
   const accessToken = signAccessToken({
-    userId: rtRow.user_id as string,
+    userId: rtRow.id as string,
     email: rtRow.email as string,
     username: rtRow.username as string,
     role: rtRow.role as 'USER' | 'ADMIN',
   });
 
-  res.json({ success: true, data: { token: accessToken } });
+  // Convert the user records using your public parser utility
+  const user = toUserPublic(rtRow);
+
+  // Send BOTH items back so the frontend context populates instantly
+  res.json({ success: true, data: { user, token: accessToken } });
 }
 
 // ─── POST /api/auth/logout ────────────────────────────────────────────────────
