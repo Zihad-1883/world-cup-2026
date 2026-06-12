@@ -29,16 +29,14 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like Postman or server-to-server calls)
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
     },
-    credentials: true,
+    credentials: true, // CRITICAL: Tells Express to receive and read incoming cookies!
   })
 );
 app.use(express.json());

@@ -1,13 +1,15 @@
-import { 
-  ApiResponse, 
+'use client';
+
+import {
+  ApiResponse,
   UserPublic,
-  TeamBasic, 
-  TeamFull, 
-  Player, 
-  Round, 
-  MatchBasic, 
-  MatchFull, 
-  PredictionWithMatch, 
+  TeamBasic,
+  TeamFull,
+  Player,
+  Round,
+  MatchBasic,
+  MatchFull,
+  PredictionWithMatch,
   AccuracyStats,
   CommentWithReactions,
   ReactionType
@@ -16,13 +18,13 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 async function apiFetch<T>(
-  path: string, 
-  options?: RequestInit, 
-  token?: string, 
+  path: string,
+  options?: RequestInit,
+  token?: string,
   setToken?: (t: string | null) => void
 ): Promise<ApiResponse<T>> {
   const url = path.startsWith('http') ? path : `${API_URL}${path}`;
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -43,10 +45,14 @@ async function apiFetch<T>(
 
     // Auto-refresh on 401
     if (res.status === 401 && !path.includes('/auth/refresh') && !path.includes('/auth/login')) {
+      // ─── CRITICAL REPAIR ───────────────────────────────────────────────────
+      // We must explicitly use credentials: 'include' here as well, so this call 
+      // can read the HTTP-only cookie sent from Render.
       const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include', // <-- This was missing!
       });
+      // ─────────────────────────────────────────────────────────────────────────
 
       if (refreshRes.ok) {
         const { data } = await refreshRes.json();
@@ -86,9 +92,9 @@ export const refresh = () => apiFetch<{ token: string }>('/auth/refresh', { meth
 
 // Teams
 export const getTeams = () => apiFetch<{ teams: TeamBasic[] }>('/teams');
-export const getTeam = (id: string, token?: string) => 
+export const getTeam = (id: string, token?: string) =>
   apiFetch<{ team: TeamFull; players: Player[] }>(`/teams/${id}`, {}, token);
-export const getTeamsByGroup = (groupName: string) => 
+export const getTeamsByGroup = (groupName: string) =>
   apiFetch<{ group: string, teams: TeamBasic[] }>(`/teams/group/${groupName}`);
 
 // Matches
@@ -103,44 +109,44 @@ export const getMatches = (round?: Round, group?: string) => {
   return apiFetch<{ matches: MatchBasic[] }>(`/matches${query}`);
 };
 
-export const getMatch = (id: string, token: string) => 
+export const getMatch = (id: string, token: string) =>
   apiFetch<{ match: MatchFull }>(`/matches/${id}`, {}, token);
 
 // Predictions
 export const submitPredictions = (
-  token: string, 
+  token: string,
   predictions: Array<{ matchId: string, predictedWinnerId?: string | null, predictedSlot?: number | null }>
 ) =>
-  apiFetch<{ saved: number, skipped: number }>('/predictions', { 
-    method: 'POST', 
-    body: JSON.stringify({ predictions }) 
+  apiFetch<{ saved: number, skipped: number }>('/predictions', {
+    method: 'POST',
+    body: JSON.stringify({ predictions })
   }, token);
 
-export const getMyPredictions = (token: string) => 
+export const getMyPredictions = (token: string) =>
   apiFetch<{ predictions: PredictionWithMatch[] }>('/predictions/me', {}, token);
 
-export const getMyAccuracy = (token: string) => 
+export const getMyAccuracy = (token: string) =>
   apiFetch<AccuracyStats>('/predictions/me/accuracy', {}, token);
 
-export const getStats = () => 
+export const getStats = () =>
   apiFetch<{ topPickedWinner: TeamBasic; popularPicks: any[]; totalPredictors: number }>('/predictions/stats');
 
 // Users
 export const getMe = (token: string) => apiFetch<{ user: UserPublic }>('/users/me', {}, token);
-export const updateProfile = (token: string, data: { username?: string; email?: string }) => 
+export const updateProfile = (token: string, data: { username?: string; email?: string }) =>
   apiFetch<{ user: UserPublic }>('/users/me', { method: 'PATCH', body: JSON.stringify(data) }, token);
 
-export const updateAvatar = (token: string, avatarUrl: string) => 
+export const updateAvatar = (token: string, avatarUrl: string) =>
   apiFetch<{ user: UserPublic }>('/users/me/avatar', { method: 'PATCH', body: JSON.stringify({ avatarUrl }) }, token);
 
 export const updatePredictionMode = (mode: string, token: string) =>
-  apiFetch<{ user: UserPublic }>('/users/me/mode', { method: 'PATCH', body: JSON.stringify({ mode }) }, token);
+  apiFetch<{ user: UserPublic }>('/users/me/mode', { method: 'PATCH', body: JSON.stringify(mode) }, token);
 
 // Lite Mode Predictions
 export const submitLitePredictions = (token: string, selections: Record<string, string[]>) =>
-  apiFetch<{ saved: number }>('/predictions/lite/groups', { 
-    method: 'POST', 
-    body: JSON.stringify({ selections }) 
+  apiFetch<{ saved: number }>('/predictions/lite/groups', {
+    method: 'POST',
+    body: JSON.stringify({ selections })
   }, token);
 
 export const getMyLitePredictions = (token: string) =>
@@ -148,22 +154,22 @@ export const getMyLitePredictions = (token: string) =>
 
 
 // Comments
-export const getComments = (token: string, matchId?: string) => 
+export const getComments = (token: string, matchId?: string) =>
   apiFetch<{ comments: CommentWithReactions[] }>(`/comments${matchId ? `?matchId=${matchId}` : ''}`, {}, token);
 
-export const postComment = (token: string, payload: { content: string; matchId?: string; parentId?: string }) => 
-  apiFetch<{ comment: CommentWithReactions }>('/comments', { 
-    method: 'POST', 
-    body: JSON.stringify(payload) 
+export const postComment = (token: string, payload: { content: string; matchId?: string; parentId?: string }) =>
+  apiFetch<{ comment: CommentWithReactions }>('/comments', {
+    method: 'POST',
+    body: JSON.stringify(payload)
   }, token);
 
-export const deleteComment = (token: string, id: string) => 
+export const deleteComment = (token: string, id: string) =>
   apiFetch<{ success: true }>(`/comments/${id}`, { method: 'DELETE' }, token);
 
-export const reactToComment = (token: string, id: string, type: ReactionType) => 
-  apiFetch<{ reaction: any, counts: { LIKE: number, LOVE: number } }>(`/comments/${id}/react`, { 
-    method: 'POST', 
-    body: JSON.stringify({ type }) 
+export const reactToComment = (token: string, id: string, type: ReactionType) =>
+  apiFetch<{ reaction: any, counts: { LIKE: number, LOVE: number } }>(`/comments/${id}/react`, {
+    method: 'POST',
+    body: JSON.stringify({ type })
   }, token);
 
 // Admin

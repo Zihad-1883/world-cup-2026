@@ -13,31 +13,42 @@ export default function LiveTicker() {
   useEffect(() => {
     const fetchLive = async () => {
       try {
-        const res = await getMatches();
-        if (res.success) {
-          // Filter for matches that have scores but are not locked (our definition of LIVE)
-          // or matches starting very soon
-          const now = new Date();
-          const filtered = res.data.matches.filter(m => {
-             const startTime = new Date(m.kickoffTime);
-             const isToday = startTime.toDateString() === now.toDateString();
-             // In our app, if it has scores and is not locked, it's live
-             return (m.team1Score !== null && !m.isLocked) || (isToday && !m.isLocked);
-          });
-          setLiveMatches(filtered.slice(0, 5));
+        const res = await getMatches() as any; // Cast temporarily to check dynamic properties safely
+
+        if (res && res.success) {
+          // ─── Extract Matches Array with Safe Key Fallbacks ─────────────────
+          // Catches res.data.matches, res.matches, or res.data as a fallback array
+          const rawMatches = res.data?.matches || res.matches || (Array.isArray(res.data) ? res.data : []);
+
+          if (Array.isArray(rawMatches)) {
+            const now = new Date();
+
+            const filtered = rawMatches.filter((m: MatchBasic) => {
+              if (!m.kickoffTime) return false;
+
+              const startTime = new Date(m.kickoffTime);
+              const isToday = startTime.toDateString() === now.toDateString();
+
+              // A match is live if it has an ongoing score and isn't locked, or kicks off today
+              return (m.team1Score !== null && !m.isLocked) || (isToday && !m.isLocked);
+            });
+
+            setLiveMatches(filtered.slice(0, 5));
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch live matches:', err);
+        console.error('Failed to fetch live matches inside ticker:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchLive();
-    const interval = setInterval(fetchLive, 30000); // refresh every 30s
+    const interval = setInterval(fetchLive, 30000); // Poll server every 30s
     return () => clearInterval(interval);
   }, []);
 
+  // Render nothing during loading or if no live/today matches exist
   if (loading && liveMatches.length === 0) return null;
   if (!loading && liveMatches.length === 0) return null;
 
@@ -55,16 +66,18 @@ export default function LiveTicker() {
           <div className="flex-1 flex items-center overflow-x-auto no-scrollbar scroll-smooth">
             <div className="flex items-center divide-x divide-white/10">
               {liveMatches.map((match) => (
-                <Link 
+                <Link
                   key={match.id}
                   href={`/matches/${match.id}`}
                   className="flex items-center space-x-6 px-8 py-2 hover:bg-white/5 transition-colors whitespace-nowrap group"
                 >
                   <div className="flex items-center space-x-2">
-                    <img src={match.team1FlagUrl || ''} className="w-5 h-3 object-cover rounded-sm border border-white/10" alt="" />
+                    {match.team1FlagUrl && (
+                      <img src={match.team1FlagUrl} className="w-5 h-3 object-cover rounded-sm border border-white/10" alt="" />
+                    )}
                     <span className="text-[10px] font-black text-white uppercase">{match.team1Code}</span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-black text-green-500 tabular-nums">
                       {match.team1Score ?? 0} : {match.team2Score ?? 0}
@@ -73,13 +86,17 @@ export default function LiveTicker() {
 
                   <div className="flex items-center space-x-2 text-right">
                     <span className="text-[10px] font-black text-white uppercase">{match.team2Code}</span>
-                    <img src={match.team2FlagUrl || ''} className="w-5 h-3 object-cover rounded-sm border border-white/10" alt="" />
+                    {match.team2FlagUrl && (
+                      <img src={match.team2FlagUrl} className="w-5 h-3 object-cover rounded-sm border border-white/10" alt="" />
+                    )}
                   </div>
-                  
+
                   {match.team1Score !== null && !match.isLocked ? (
                     <span className="text-[8px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded animate-pulse uppercase">Live</span>
                   ) : (
-                    <span className="text-[8px] font-black text-slate-500 uppercase">{new Date(match.kickoffTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span className="text-[8px] font-black text-slate-500 uppercase">
+                      {new Date(match.kickoffTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   )}
                 </Link>
               ))}
@@ -87,8 +104,8 @@ export default function LiveTicker() {
           </div>
 
           <div className="hidden sm:flex items-center space-x-4 pl-4 border-l border-white/10">
-             <button className="p-1 hover:text-green-500 transition-colors"><ChevronLeft className="h-4 w-4" /></button>
-             <button className="p-1 hover:text-green-500 transition-colors"><ChevronRight className="h-4 w-4" /></button>
+            <button className="p-1 hover:text-green-500 transition-colors"><ChevronLeft className="h-4 w-4" /></button>
+            <button className="p-1 hover:text-green-500 transition-colors"><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
       </div>
