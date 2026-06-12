@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../config/db';
+import { getUserRank } from '../services/leaderboardService';
 import { UserPublic } from '../types';
 
 function toUserPublic(row: Record<string, unknown>): UserPublic {
@@ -21,7 +22,10 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     [req.user!.userId]
   );
   if (!row) { res.status(404).json({ success: false, error: 'User not found' }); return; }
-  res.json({ success: true, data: { user: toUserPublic(row) } });
+  
+  const { rank, totalPoints } = await getUserRank(req.user!.userId);
+  
+  res.json({ success: true, data: { user: toUserPublic(row), rank, totalPoints } });
 }
 
 // PATCH /api/users/me

@@ -33,6 +33,8 @@ export default function ProfilePage() {
   const [predictions, setPredictions] = useState<PredictionWithMatch[]>([]);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
   const [expandedRounds, setExpandedRounds] = useState<Record<string, boolean>>({ GROUP: true });
+  const [rank, setRank] = useState<number | null>(null);
+  const [totalPoints, setTotalPoints] = useState<number | null>(null);
   
   // Form state
   const [username, setUsername] = useState(user?.username || '');
@@ -52,6 +54,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (token) {
+      // Get real rank and total points
+      import('@/lib/api').then(({ getMe }) => {
+        getMe(token).then((res: any) => {
+          if (res.success) {
+            setRank(res.data.rank);
+            setTotalPoints(res.data.totalPoints);
+          }
+        });
+      });
+
       getMyAccuracy(token).then(res => {
         if (res.success) setStats(res.data);
       });
@@ -139,16 +151,16 @@ export default function ProfilePage() {
                     </div>
                  </div>
 
-                 <div className="mt-10 grid grid-cols-2 gap-4">
+                  <div className="mt-10 grid grid-cols-2 gap-4">
                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50">
-                      <p className="text-2xl font-black text-white">{stats?.pointsTotal || 0}</p>
+                      <p className="text-2xl font-black text-white">{totalPoints ?? (stats?.pointsTotal || 0)}</p>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Total Points</p>
                     </div>
                     <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50">
-                      <p className="text-2xl font-black text-green-500">#{Math.floor(Math.random() * 1000) + 1}</p>
+                      <p className="text-2xl font-black text-green-500">#{rank || '?'}</p>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">World Rank</p>
                     </div>
-                 </div>
+                  </div>
               </div>
 
               <div className="bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-xl">

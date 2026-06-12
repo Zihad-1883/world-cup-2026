@@ -38,15 +38,12 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
         ) : (
-          <div className="relative w-full h-full flex flex-col items-center justify-end">
-            <img 
-               src={player.position === 'GK' ? '/images/gk_silhouette.png' : '/images/player_silhouette.png'} 
-               alt="" 
-               className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-            />
-            <div className={`w-28 h-28 rounded-full ${getPositionColor(player.position)} flex items-center justify-center text-4xl font-black text-white mb-8 shadow-2xl relative z-10 border-4 border-[#0a0c10] group-hover:scale-110 transition-transform`}>
-              <span className="relative z-10">{player.shirtName?.[0] || player.name[0]}</span>
+          <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-[#0a0c10]">
+            <div className={`w-32 h-32 rounded-full ${getPositionColor(player.position)} flex items-center justify-center text-5xl font-black text-white shadow-[0_0_50px_rgba(34,197,94,0.15)] relative z-10 border-8 border-[#0a0c10] group-hover:scale-110 transition-transform duration-500`}>
+              <span className="relative z-10 drop-shadow-2xl">{player.shirtName?.[0] || player.name[0]}</span>
+              <div className="absolute inset-0 rounded-full bg-white/10 blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
+            <div className="absolute bottom-12 text-[10px] font-black text-slate-700 uppercase tracking-[0.5em] group-hover:text-green-500/50 transition-colors">Elite Player</div>
           </div>
         )}
         

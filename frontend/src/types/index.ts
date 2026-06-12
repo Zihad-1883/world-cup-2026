@@ -105,6 +105,7 @@ export interface Comment {
   id: string;
   userId: string;
   matchId: string | null;
+  parentId: string | null;
   content: string;
   createdAt: string;
   updatedAt: string;

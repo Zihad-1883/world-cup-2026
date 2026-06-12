@@ -4,22 +4,26 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import { getTeams, getMatches } from '@/lib/api';
 import { TeamBasic, MatchBasic } from '@/types';
-import { Calendar, Users2, LayoutGrid, ChevronRight, MapPin, Search } from 'lucide-react';
+import { Calendar, Users2, LayoutGrid, ChevronRight, MapPin, Search, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import MatchCard from '@/components/predictions/MatchCard';
 
 export default function ExplorePage() {
   const [teams, setTeams] = useState<TeamBasic[]>([]);
   const [matches, setMatches] = useState<MatchBasic[]>([]);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'groups' | 'schedule'>('groups');
+  const [activeTab, setActiveTab] = useState<'groups' | 'schedule' | 'stats'>('groups');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    Promise.all([getTeams(), getMatches()]).then(([teamsRes, matchesRes]) => {
-      if (teamsRes.success) setTeams(teamsRes.data.teams);
-      if (matchesRes.success) setMatches(matchesRes.data.matches);
-      setLoading(false);
+    import('@/lib/api').then(({ getTeams, getMatches, getStats }) => {
+      Promise.all([getTeams(), getMatches(), getStats()]).then(([teamsRes, matchesRes, statsRes]) => {
+        if (teamsRes.success) setTeams(teamsRes.data.teams);
+        if (matchesRes.success) setMatches(matchesRes.data.matches);
+        if (statsRes.success) setStats(statsRes.data);
+        setLoading(false);
+      });
     });
   }, []);
 
@@ -66,6 +70,13 @@ export default function ExplorePage() {
                   >
                     <Calendar className="h-3 w-3" />
                     <span>Full Schedule</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('stats')}
+                    className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'stats' ? 'bg-green-500 text-black shadow-lg shadow-green-500/20' : 'text-slate-400 hover:text-white'}`}
+                  >
+                    <BarChart3 className="h-3 w-3" />
+                    <span>Global Intelligence</span>
                   </button>
                </div>
 
@@ -125,7 +136,7 @@ export default function ExplorePage() {
                   </div>
                ))}
             </div>
-         ) : (
+         ) : activeTab === 'schedule' ? (
             <div className="space-y-12">
                {/* Simplified Schedule View */}
                {Array.from(new Set(matches.map(m => m.round))).map(round => (
@@ -140,6 +151,60 @@ export default function ExplorePage() {
                      </div>
                   </div>
                ))}
+            </div>
+         ) : (
+            <div className="space-y-16 animate-in fade-in duration-700">
+               <div className="text-center">
+                  <h2 className="nike-title text-4xl italic tracking-tighter mb-4">Community <span className="text-green-500">Pick intelligence</span></h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Global prediction trends from {stats?.totalPredictors || 0} expert fans</p>
+               </div>
+
+               {stats?.topPickedWinner ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                     {/* Top Pick Feature */}
+                     <div className="lg:col-span-1 glass-panel rounded-[40px] border border-white/10 p-10 bg-gradient-to-br from-green-500/10 to-transparent relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-3xl -mr-16 -mt-16" />
+                        <h3 className="text-xs font-black text-green-500 uppercase tracking-[0.3em] mb-10">Consensus Winner</h3>
+                        
+                        <div className="space-y-8 flex flex-col items-center">
+                           <div className="w-40 h-24 bg-slate-900 rounded-2xl border-4 border-white/10 overflow-hidden shadow-2xl rotate-[-4deg]">
+                              <img src={stats.topPickedWinner.flagUrl || ''} alt="" className="w-full h-full object-cover" />
+                           </div>
+                           <div className="text-center">
+                              <h4 className="nike-title text-5xl text-white italic tracking-tighter">{stats.topPickedWinner.name}</h4>
+                              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">{stats.topPickedWinner.confederation}</p>
+                           </div>
+                        </div>
+                     </div>
+
+                     {/* Trending List */}
+                     <div className="lg:col-span-2 glass-panel rounded-[40px] border border-white/10 p-10">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-10">Tournament Trend List</h3>
+                        <div className="space-y-6">
+                           {stats.popularPicks.slice(0, 5).map((pick: any, i: number) => (
+                              <div key={pick.team.id} className="flex items-center group">
+                                 <span className="w-8 nike-title text-2xl text-slate-800 italic mr-6">{i + 1}</span>
+                                 <img src={pick.team.flagUrl || ''} alt="" className="w-10 h-6 object-cover rounded-md border border-white/10 mr-4" />
+                                 <div className="flex-1">
+                                    <p className="text-sm font-black text-white uppercase tracking-tight">{pick.team.name}</p>
+                                    <div className="h-1.5 bg-white/5 rounded-full mt-2 w-full max-w-xs overflow-hidden">
+                                       <div className="h-full bg-green-500 rounded-full" style={{ width: `${pick.percentOfUsers}%` }} />
+                                    </div>
+                                 </div>
+                                 <div className="text-right">
+                                    <p className="text-sm font-black text-green-500 italic">{pick.percentOfUsers}%</p>
+                                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest">Confidence Score</p>
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+                  </div>
+               ) : (
+                  <div className="text-center py-20 bg-white/5 rounded-[40px] border border-dashed border-white/10">
+                     <p className="text-slate-500 font-black uppercase tracking-widest text-xs italic">Waiting for more community intelligence to process results...</p>
+                  </div>
+               )}
             </div>
          )}
       </main>

@@ -84,7 +84,7 @@ export default function LiveTicker() {
 
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-black text-green-500 tabular-nums">
-                      {match.team1Score ?? 0} : {match.team2Score ?? 0}
+                      {match.team1Score !== null ? `${match.team1Score} : ${match.team2Score}` : 'VS'}
                     </span>
                   </div>
 

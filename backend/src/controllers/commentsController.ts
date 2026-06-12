@@ -54,6 +54,7 @@ async function buildComment(
     author: toUserPublic(authorRow!),
     reactionCounts,
     userReaction,
+    parentId: (commentRow.parent_id as string | null) ?? null,
   };
 }
 
@@ -68,7 +69,7 @@ export async function getComments(req: Request, res: Response): Promise<void> {
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const rows = await query<Record<string, unknown>>(
-    `SELECT id, user_id, match_id, content, created_at, updated_at FROM comments ${where} ORDER BY created_at DESC`,
+    `SELECT id, user_id, match_id, parent_id, content, created_at, updated_at FROM comments ${where} ORDER BY created_at DESC`,
     values
   );
 
@@ -78,7 +79,7 @@ export async function getComments(req: Request, res: Response): Promise<void> {
 
 // POST /api/comments
 export async function postComment(req: Request, res: Response): Promise<void> {
-  const { content, matchId } = req.body as { content?: string; matchId?: string };
+  const { content, matchId, parentId } = req.body as { content?: string; matchId?: string; parentId?: string };
   const userId = req.user!.userId;
 
   if (!content || content.trim().length === 0) {
@@ -91,10 +92,10 @@ export async function postComment(req: Request, res: Response): Promise<void> {
   }
 
   const rows = await query<Record<string, unknown>>(
-    `INSERT INTO comments (user_id, match_id, content)
-     VALUES ($1, $2, $3)
-     RETURNING id, user_id, match_id, content, created_at, updated_at`,
-    [userId, matchId ?? null, content.trim()]
+    `INSERT INTO comments (user_id, match_id, parent_id, content)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, user_id, match_id, parent_id, content, created_at, updated_at`,
+    [userId, matchId ?? null, parentId ?? null, content.trim()]
   );
 
   const comment = await buildComment(rows[0], userId);
