@@ -49,6 +49,10 @@ app.get('/health', (_req, res) => {
   res.json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
 });
 
+// Add this right here to cover the baseline root directory!
+app.get('/', (_req, res) => {
+  res.json({ success: true, message: "World Cup 2026 Production API Gate active." });
+});
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
