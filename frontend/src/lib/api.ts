@@ -106,7 +106,11 @@ export const getMatches = (round?: Round, group?: string) => {
     if (group) params.append('group', group);
     query = `?${params.toString()}`;
   }
-  return apiFetch<{ matches: MatchBasic[] }>(`/matches${query}`);
+
+  // Pass cache: 'no-store' into the RequestInit options override field
+  return apiFetch<{ matches: MatchBasic[] }>(`/matches${query}`, {
+    cache: 'no-store', // 👈 FORCES NEXT.JS TO FETCH FRESH FROM RENDER EVERY 30 SECONDS
+  });
 };
 
 export const getMatch = (id: string, token: string) =>
