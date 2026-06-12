@@ -1,0 +1,20 @@
+# Block all dependency folders globally, anywhere in the project
+**/node_modules/
+node_modules/
+
+# Block Next.js and build outputs globally
+**/.next/
+**/dist/
+**/build/
+**/out/
+
+# Block all environment secret files anywhere
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+**/.env.*.local
+
+# Block OS garbage files
+**.DS_Store
+Thumbs.db
